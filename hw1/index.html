@@ -28,7 +28,7 @@
 	<body>
 		<div class="container">
 		<h1>CS184/284A Spring 2025 Homework 1 Write-Up</h1>
-		<div style="text-align: center;">Names: </div>
+		<div style="text-align: center;">Names: David Hernandez </div>
 
 		<br>
 
@@ -48,7 +48,7 @@
 		I learned about all the various ways that an image can be distorted and show artificacts, especially when they are high detailed and have very fine lines.
 		I also learned about methods of anti-aliasing so that less of these artifacts were apparent, and how things like super sampling can help blend pixels to smoothen out an image.
 
-		I also learned about texture mapping and how different methods like nearest sampling and bilinaer sampling can effect how a texture that is mapped.
+		I also learned about texture mapping and how different methods like nearest sampling and bilinear sampling can effect how a texture that is mapped.
 
 		<h2>Task 1: Drawing Single-Color Triangles</h2>
 		Explanation of triangle rasterization:
@@ -138,8 +138,8 @@
 			</table>
 
 			The relative differences here happen along lines. With nearest sampling looking more jagged than bilinear sampling which smooths out lines and makes the transitions more gradual by averaging out pixels. 
-			Since relative differences simply picks the nearest pixel, if the image has a low resolution or sample rate, then it means that there is a good chance the nearest pixel is not exactly representative what should be in the sample buffer.
-			Since bilinear sampling is averagint out the 4 pixels, it somewhat accounts for this low resolution and acocunts for it with its averaging. 
+			Since relative differences simply picks the nearest pixel, if the image has a low resolution or sample rate, then it means that there is a good chance the nearest pixel is not exactly representative of what should be in the sample buffer.
+			Since bilinear sampling is averaging out the 4 pixels, it somewhat accounts for this low resolution and accounts for it with its averaging. 
 			This explains why there is a large difference between the two methods when the sampling rate is low, but not such high of a difference when the sampling rate is high, since high sample rates automatically make an average for you.
 		</div>
 
