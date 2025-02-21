@@ -67,21 +67,21 @@
 			  <tr>
 				<td style="text-align: center;">
 				  <img src="super_sample_1.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <figcaption>Super Sample x1: There is no super sampling here. Thus we get aliasing along the edges of the skinny triangles.</figcaption>
 				</td>
 				<td style="text-align: center;">
 				  <img src="super_sample_4.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <figcaption>Super Sample x4: Some super sampling/averaging is occuring in this image. We no longer see that pixels are only on/off. At the end of the red skinny triangles there are varying shades of red from the body to the edge pixel.</figcaption>
 				</td>
 			  </tr>
 			  <tr>
 				<td style="text-align: center;">
 				  <img src="super_sample_9.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <figcaption>Super Sample x9:Stronger effect than the x4 super sample, but more pixels are colored in/smoothing out the sharp edges of the first triangle render.</figcaption>
 				</td>
 				<td style="text-align: center;">
 				  <img src="super_sample_16.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <figcaption>Super Sample x16:Smoothest image here. Sharp edges at the corners of triangles are smoothed out with pixels that are the average color of the triangle. Eliminating the pixely look of the first render.</figcaption>
 				</td>
 			  </tr>
 			</table>
