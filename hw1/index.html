@@ -54,36 +54,38 @@
 		Explanation of triangle rasterization:
 		In order to rasterize the triangle, I calculated the smallest possible bounding box that the triangle was contained in by getting the min and the max of both the x coordinates and the y coordinates. Every triangle can be contained inside one of these boxes, which ensures that this method always works. I then went through each one of the pixels in the bounding box and checked if it was inside of the triangle with a helper function is_inside_triangle that used the edge function test from lecture to check if one point was in a triangle or not. If it was inside of the triangle, then that means that we should fill in the pixel. This helper function was implemented using the logic from the lecture, where we calculate L0,L1,L3 edge function values and determine if the pixel was inside of the triangle based on if all of these values have the same sign. 
 		<img src="real_task_1_ss.png" width="400px"/>
+		
+		<h2>Task 2: Antialiasing by Supersampling</h2>
+		Super sampling is useful because it reduces/eliminates aliasing. Aliasing is when you have artifacts that show up that can distort an image. It can show up in edges, and is when single sampling is too simple to get the finer details of an image. Thus you get pixels at the edges that kind of look like they do not belong. Like in the first sample picture below along a skinny triangle. Some pixels are isolated from the rest of the shape at the very edges, but with supersampling the pixels missing in between the edges and the rest of the shape are filled in or averaged out, fixing these artifacts and creating a sharper/ “more correct” looking image. Since pixels that were incorrectly left unshaded are now shaded in. 
 
 
+		In order to implement this into our pipeline, I modified the buffer to store multiple subpixel samples per pixel. Now each pixel is divided into multiple smaller pixels and we had to change the sample_buffer size to account for this as for each pixel we need to sample N*N points. So to do this inside of rasterize_triangle we need to go through the N*N subpixels per pixel. And then do the same logic we did for task 1 for these smaller pixels to check if they are in the triangle or not. We then need to resolve_to_framebuffer in order to average out all these extra subpixels into one color. I did this by going through all the sub_pixels for each pixel and taking the average of the colors for that pixel, and filling in the pixel color with that value. Since by pigeon hole we cannot put a bigger sample_buffer into the frame buffer. However, averaging out a higher resolution image is much more representative of the actual image than single sampling, so this result still looks better than before. I also had to modify fill_pixel, so that all the sub-sample pixels were filled in with the correct color, as before we just indexed and filled one color. Same logic applied with modifying the sample_buffer helper functions to work with the increased size of the sample_buffer since we now have more samples before inserting into the frame_buffer. I then used supersampling to antialias the triangles, and the result is below.
+		
 		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
+				  <img src="super_sample_1.png" width="400px"/>
 				  <figcaption>Caption goes here.</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
+				  <img src="super_sample_4.png" width="400px"/>
 				  <figcaption>Caption goes here.</figcaption>
 				</td>
 			  </tr>
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
+				  <img src="super_sample_9.png" width="400px"/>
 				  <figcaption>Caption goes here.</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
+				  <img src="super_sample_16.png" width="400px"/>
 				  <figcaption>Caption goes here.</figcaption>
 				</td>
 			  </tr>
 			</table>
 		</div>
-		
-		<h2>Task 2: Antialiasing by Supersampling</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 		<h2>Task 3: Transforms</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
