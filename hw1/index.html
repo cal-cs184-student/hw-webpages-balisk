@@ -53,8 +53,8 @@
 		<h2>Task 1: Drawing Single-Color Triangles</h2>
 		Explanation of triangle rasterization:
 		In order to rasterize the triangle, I calculated the smallest possible bounding box that the triangle was contained in by getting the min and the max of both the x coordinates and the y coordinates. Every triangle can be contained inside one of these boxes, which ensures that this method always works. I then went through each one of the pixels in the bounding box and checked if it was inside of the triangle with a helper function is_inside_triangle that used the edge function test from lecture to check if one point was in a triangle or not. If it was inside of the triangle, then that means that we should fill in the pixel. This helper function was implemented using the logic from the lecture, where we calculate L0,L1,L3 edge function values and determine if the pixel was inside of the triangle based on if all of these values have the same sign. 
+		<img src="real_task_1_ss.png" width="400px"/>
 
-		
 
 		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
 		<div style="display: flex; flex-direction: column; align-items: center;">
