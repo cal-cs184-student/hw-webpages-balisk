@@ -99,6 +99,48 @@
 
 		<h2>Task 5: "Pixel sampling" for texture mapping</h2>
 		
+		When we are putting textures on shapes, we need to map screen pixels to what the texture pixels are. Pixel Sampling is the process of finding out what the color of a pixel on screen should be when mapping a texture image onto a shape in 2d or 3d. To do this we take samples from a texture, and use these samples to determine what colors the image should be if the texture was placed onto it. When rendering textures and shapes we use texture coordinates like u,v in order to see how a texture maps to a shape. However, since textures coordinates do not always align with screen coordinates, it is often necessary to we use pixel sampling, so for each coordinate (x,y) on screen we look at the (u,v) texture coordinates and sample at these coordinates in the texture to decide what color (x,y) should map to.  So for every (x,y) we look at the corresponding (u,v) coordinate, then we take a sample at those coordinates, the way that we take the sample concludes what color the final pixel should have. There are two different sampling methods. 
+
+		Nearest Sampling is the method in which you decide the color by picking the closest texel to (u,v). Bilinear sampling is the method where you pick the color by blending/averaging the four nearest texels together, which ultimately smoothes out the transitions. 
+
+		My implementation consisted of me 
+		- Computing the texture coordinates (u,v) with barycentric interpolation
+		- Sampling with the correct sampling method (nearest or bilinear)
+			- If it was nearest, I chose the closest texel using the helper function (sample_nearest)
+			- If it was bilinear, I averaged out the 4 nearest texels and returned the color that way with the helper function (sample_bilinear)
+		- After finding the color I inserted it into the sample_buffer
+
+		Here are the screenshots that I picked out. I picked the world with the grid lines because bilinear beats out nearest because nearest will just take out and place the nearest color of the pixel it finds. Meaning that all your pixels will just be all white or another color. This results in images that look almost jagged and makes lines look segmented and broken. If you turn on bilinear these lines suddenly do not have breaks because the averaging of the four nearest texels means that you get an image that is alot smoother and gives the fine details/lines a transition from all white to semi white while going along the line. Meaning that the line becomes clear to see and is not as broken as nearest. This isnt as apparent with the nearest 16x supersampling because the super sampling algorithm naturally averages out the pixels in the super sample and does not show the clear always on and always off pixels, making the image look alot sharper. 
+
+		
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="nearest_super_sample_1.png" width="400px"/>
+				  <figcaption>Nearest Sampling 1 SPP</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="nearest_super_sample_16_world_nearest.png" width="400px"/>
+				  <figcaption> Nearest Sampling 16 SPP</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="super_sample1_bilinear_world.png" width="400px"/>
+				  <figcaption>Bilinear 1 SPP</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="bilinear_super_sample_16.png" width="400px"/>
+				  <figcaption>Bilinear 16 SPP</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+
+
+		
 
 		<h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
 		
