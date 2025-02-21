@@ -136,6 +136,11 @@
 				</td>
 			  </tr>
 			</table>
+
+			The relative differences here happen along lines. With nearest sampling looking more jagged than bilinear sampling which smooths out lines and makes the transitions more gradual by averaging out pixels. 
+			Since relative differences simply picks the nearest pixel, if the image has a low resolution or sample rate, then it means that there is a good chance the nearest pixel is not exactly representative what should be in the sample buffer.
+			Since bilinear sampling is averagint out the 4 pixels, it somewhat accounts for this low resolution and acocunts for it with its averaging. 
+			This explains why there is a large difference between the two methods when the sampling rate is low, but not such high of a difference when the sampling rate is high, since high sample rates automatically make an average for you.
 		</div>
 
 
