@@ -61,7 +61,7 @@
 
 		In order to implement this into our pipeline, I modified the buffer to store multiple subpixel samples per pixel. Now each pixel is divided into multiple smaller pixels and we had to change the sample_buffer size to account for this as for each pixel we need to sample N*N points. So to do this inside of rasterize_triangle we need to go through the N*N subpixels per pixel. And then do the same logic we did for task 1 for these smaller pixels to check if they are in the triangle or not. We then need to resolve_to_framebuffer in order to average out all these extra subpixels into one color. I did this by going through all the sub_pixels for each pixel and taking the average of the colors for that pixel, and filling in the pixel color with that value. Since by pigeon hole we cannot put a bigger sample_buffer into the frame buffer. However, averaging out a higher resolution image is much more representative of the actual image than single sampling, so this result still looks better than before. I also had to modify fill_pixel, so that all the sub-sample pixels were filled in with the correct color, as before we just indexed and filled one color. Same logic applied with modifying the sample_buffer helper functions to work with the increased size of the sample_buffer since we now have more samples before inserting into the frame_buffer. I then used supersampling to antialias the triangles, and the result is below.
 		
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+		<p>Super Sampling Images</p>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
@@ -71,33 +71,69 @@
 				</td>
 				<td style="text-align: center;">
 				  <img src="super_sample_4.png" width="400px"/>
-				  <figcaption>Super Sample x4: Some super sampling/averaging is occuring in this image. We no longer see that pixels are only on/off. At the end of the red skinny triangles there are varying shades of red from the body to the edge pixel.</figcaption>
+				  <figcaption>Super Sample x4: Some super sampling/averaging is occuring in this image. We no longer see that pixels are only on/off, since the super sampling is averaging the pixel color from the high res image and putting it into the image pixel. At the end of the red skinny triangles there are varying shades of red from the body to the edge pixel.</figcaption>
 				</td>
 			  </tr>
 			  <tr>
 				<td style="text-align: center;">
 				  <img src="super_sample_9.png" width="400px"/>
-				  <figcaption>Super Sample x9:Stronger effect than the x4 super sample, but more pixels are colored in/smoothing out the sharp edges of the first triangle render.</figcaption>
+				  <figcaption>Super Sample x9:Stronger effect than the x4 super sample, but more pixels are colored in/smoothing out the sharp edges of the first triangle render. This has the same reasoning as x4 super sampling but more pixels are averaged out for the final image.</figcaption>
 				</td>
 				<td style="text-align: center;">
 				  <img src="super_sample_16.png" width="400px"/>
-				  <figcaption>Super Sample x16:Smoothest image here. Sharp edges at the corners of triangles are smoothed out with pixels that are the average color of the triangle. Eliminating the pixely look of the first render.</figcaption>
+				  <figcaption>Super Sample x16:Smoothest image here. Sharp edges at the corners of triangles are smoothed out with pixels that are the average color of the triangle. Eliminating the pixely look of the first render.  This has the same reasoning as x4 super sampling but more pixels are averaged out for the final image.</figcaption>
 				</td>
 			  </tr>
 			</table>
 		</div>
 
 		<h2>Task 3: Transforms</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+		<img src="red_man_doing_the_wave_dance.png" width="400px"/>
+		This is a robot doing the arm wave dance.
 
 		<h2>Task 4: Barycentric coordinates</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		Barycentric coordinates is a coordinate system for triangles. It lets you express any 2d point inside of a triangle as three coordinates (alpha, beta, gamma), which all give you information about how far that point is from the 3 vertices of the triangle. For example if you have vertices A,B,C, then any point inside of the triangle will be a weighted sum of those like this. POINT = alpha * A + beta * B, gamma * C. Where each coefficient is representative of how close the point P is to that respective vertex. If one of the points is negative, that means you are outside of the triangle, and you should not color in anything. This is very useful because it can allow you to interpolate and color everything inside of a triangle by taking the weighted sum of the color of the three vertices on the triangle and making that point’s color the sum of that value. This interpolation will mean that if you have a red,green, and blue vertex the point in the middle will be an equal blend of all of the three colors. 
+
+		<img src="barry.png" width="400px"/>
 
 		<h2>Task 5: "Pixel sampling" for texture mapping</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		
 
 		<h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		
+		Level Mapping is used in texture mapping to find out which mipmap level should be used when sampling a texture. Mipmaps are just lower res images, lower res images are stored and used for when we need to map a texture to a far away point in the renderer. This is required because in a normal rendering , we have a high res image, and normally when a texture is far away one screen pixel may cover many texels, and our image may have aliasing because of this, since you are taking many pixels and losing detail, making an image look choppy. This is a problem since we don't want to use the highest resolution texture for a point so far away, we would much prefer a low resolution image (the appropriate mipmap) for this task. So instead of using high resolution images, we have mipmaps which are stored low resolution versions of textures. Depending on how far away the image is, we use the lower resolution images, since a fine level of detail is not required here. First, we compute the mipmap level using the equation from the lecture, which decides what mipmap level we use. In order to do this we have to calculate the derivatives of u and v, compute the norms, take the max of both magnitudes and then log that result to get the mipmap level. Then we use the correct mipmap level depending on what level we are on. L_ZERO means that we always choose the no mipmapping level and always take from one texture. L_NEAREST means we round the level that we find to the nearest integer, and that integer is our mipmap level. 
+
+		However it is important to note that there are always trade offs in sampling methods. Pixel sampling is the fastest but since the far away pictures condense many pixels into one you lose detail which can cause aliasing, it uses low memory since it just uses the one texture (fast speed, low memory, low anti-aliasing). Level sampling actually reduces this aliasing, but comes at the cost of extra memory since you have to store multiple different texture resolutions for each level, but it’s fast and these mipmaps use less memory than super sampling (high speed, medium memory, high anti-aliasing). Super Sampling provides the best possible quality but takes up the most memory and takes a long time since you are essentially working with really high resolution images in the background in order to get so much more detail (low speed, high memory, high anti-aliasing).
+
+
+
+		<p></p>
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="L_ZERO AND P_NEAREST.png" width="400px"/>
+				  <figcaption>L ZERO | P NEAREST</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="L_ZERO AND P_LINEAR.png" width="400px"/>
+				  <figcaption>L ZERO | P LINEAR</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="L_NEAREST_AND_P_NEAREST.png" width="400px"/>
+				  <figcaption>L NEAREST | P_NEAREST</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="L_NEAREST AND P_LINEAR.png" width="400px"/>
+				  <figcaption>L NEAREST | P_LINEAR</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
 
 		<h2>(Optional) Task 7: Extra Credit - Draw Something Creative!</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
