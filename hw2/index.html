@@ -32,85 +32,349 @@
 
 		<br>
 
-		Link to webpage: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
+		Link to webpage:<a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
 
 		<br>
 		
-		Link to GitHub repository: (TODO) <a href="https://cs184.eecs.berkeley.edu/sp25">cs184.eecs.berkeley.edu/sp25</a>
-
-		<figure>
-			<img src="teapot.png" alt="Teapot" style="width:50%"/>
-			<figcaption>You can add images with captions!</figcaption>
-		</figure>
+		Link to GitHub repository: <a href="https://github.com/cal-cs184-student/sp25-hw1-balik?tab=readme-ov-file">Github Repo</a>
 
 		<!--
 		We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
 		-->
 
 		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
+
+		In this homework I implemented a mesh editor that worked with
+		both bezier curves and the half edge data structure that is common
+		in 3d applications. 
 
 		<h2>Section I: Bezier Curves and Surfaces</h2>
 
 		<h3>Part 1: Bezier curves with 1D de Casteljau subdivision</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+		<p>
+			Creating curves in computer graphics is a hard problem. If you just connect
+			straight lines to each other, sharp edges will be created that will not
+			look good. At the same time polynomial equations are difficult to use
+			and oftentimes dont have a level of control that you need. 
+			The Casteljas algorithm is a way to create curves that dont have the
+			above problems. This is a recursive algorithm that finds point on a 
+			bezier curve by repeatadly applying linear interpolation between control
+			points. This is how I implemented it. Given a set of control points
+			and a parameters 0 through 1, I create a new set of intermediate points
+			by calculating weighted averages of the control points.
+
+			so for a pair of points (p1, p2) we have p_new = (1-t) * p1 + t * p2.
+
+			This finds a point that is just t away from points p1 and p2.
+			And through repeatadly doing this we find points that lie on a bezier curve.
+
+			Since bezier curve is defined as the point you get after this process, doing this
+			many times by calling E, from the t values (0,1) gets you the whole bezier curve from the first control
+			points to the last one. 
+		</p>
+
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="teapot.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="img/p1_screenshots/base_curve.png" width="400px"/>
+				  <figcaption>Base Curve</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="teapot.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="img/p1_screenshots/base_curve_1.png" width="400px"/>
+				  <figcaption> Curve Step 1</figcaption>
 				</td>
 			  </tr>
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="teapot.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="img/p1_screenshots/base_curve_2.png" width="400px"/>
+				  <figcaption>Curve Step 2</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="teapot.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="img/p1_screenshots/base_curve_3.png" width="400px"/>
+				  <figcaption>Curve Step 3</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="img/p1_screenshots/base_curve_4.png" width="400px"/>
+				  <figcaption>Curve Step 4</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="img/p1_screenshots/base_curve_5.png" width="400px"/>
+				  <figcaption>Curve Step 5</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="img/p1_screenshots/base_curve_3.png" width="400px"/>
+				  <figcaption>final_curve</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="img/p1_screenshots/modified_curve_1.png" width="400px"/>
+				  <figcaption>Modified Curve 1</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="img/p1_screenshots/modified_curve_2.png" width="400px"/>
+				  <figcaption> Modified Curve 2</figcaption>
 				</td>
 			  </tr>
 			</table>
 		</div>
 
 		<h3>Part 2: Bezier surfaces with separable 1D de Casteljau</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+		<p>
+			The casteljau algorithm extends to bezier surfaces quite nicely. 
+			Instead of just a bezier curve which is defined by a set of control points
+			along a parameter t all in one column. The surface is defined by a 
+			grid of control points. It is also evaluated by a set of parameters (u,v).
+
+			This is how it worksa. For each row of control points in our grid, 
+			You apply the algorithm based on the parameter (u). This creates a set of
+			points between the rows that kind of act like columns. 
+
+			These new columns kind of create a set of control points. Now you run the
+			algorithm again using these newly created points with the parameter v.
+			This will give you one final point that lies on the bezier surface at any 
+			point (u,v). Thus you get a bezier surface. 
+
+			In my implementation I created a evaluateStep function for the surface that
+			would take a set of points and a parameter and apply the recursive algorithm
+			from part 1.
+
+			I had this evaluateStep function used by evaluate1D, which would apply the
+			first function repeatadly until we had one point.
+
+			Then in the evaluate function i used the evaluate function in order to 
+			evaluate each one of the new pionts that we described earlier, the ones 
+			in between each column. I now have one point for each row now. Then with these
+			new set of control points i use the evaluate function with parameter v in 
+			order to get the point that lies on both (u,v), or the set of points along the 
+			bezier surface.
+		</p>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="img/p2_screenshots/teaPot.png" width="400px"/>
+				  <figcaption>The Tea Pot</figcaption>
+				</td>
+			  </tr>			 
+			</table>
+		</div>
 
 		<h2>Section II: Triangle Meshes and Half-Edge Data Structure</h2>
 
 		<h3>Part 3: Area-weighted vertex normals</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+		<p>
+			I implemented the weighted vertex normals by using the half edge data 
+			structures to efficiently iterate through all the triangles connected to a
+			vertex, and then computing the normal while doing so. 
+
+			To do this, I started wit the first half edge connected to a vertex, 
+			then viseted every face sharing this vertex, by moving to the twin of the
+			halfedges. This created a loop around the vertex. 
+
+			For every triangle I extracted the positions of the three vertices, calculated
+			the two edge vectors from the center vertex. Computing the face normal using the
+			cross product of the edges, then determined the triangle area, then weighted the
+			normal. The area-weighted normals from all the triangles are summed, giving
+			larger triangles that will contribute more to the final normal. This gives
+			us a vector that once normalized would create a unit normal that represents
+			what the average surface would look like at that vertex. 
+
+			It creates a smooth shading effect that makes the teacup look so smooth compared
+			to the first render.
+		</p>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="img/p3_screenshots/teapot.png" width="400px"/>
+				  <figcaption>Without Normal</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="img/p3_screenshots/vertex_normal_teapot.png" width="400px"/>
+				  <figcaption>With Normal</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
 
 		<h3>Part 4: Edge flip</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<p>
+			In order to implement the edge flip operation, I used this pdf
+			<a> http://15462.courses.cs.cmu.edu/fall2015content/misc/HalfedgeEdgeOpImplementationGuide.pdf </a>
+			. I started off by listing all the vertices,edges, half edges, and faces. 
+			Then I started reassigning all of them to the new positions they should be when
+			they were flipped. I did have some trouble debugging before listing
+			everything out in the diagram and drawing it out, just because tracking
+			all those points was tedious/confusing. But I eventually got there.
+		</p>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="img/p4_screenshots/before_flip.png" width="400px"/>
+				  <figcaption>Before Edge Flip</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="img/p3_screenshots/after_flip_1.png" width="400px"/>
+				  <figcaption>After Flip 1</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="img/p3_screenshots/after_flip_2.png" width="400px"/>
+				  <figcaption>After Flip 2</figcaption>
+				</td>
+				
+			  </tr>
+			</table>
+		</div>
+
+
 
 		<h3>Part 5: Edge split</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+		<p>
+			In order to implement the edge split operation, I used this pdf
+			<a> http://15462.courses.cs.cmu.edu/fall2015content/misc/HalfedgeEdgeOpImplementationGuide.pdf </a>
+			. I started off by listing all the vertices,edges, half edges, and faces. 
+			Then I started reassigning all of them to the new positions they should be when
+			they were split this time. Since I now had the process down from the flip
+			task, this task went alot smoother. In fact is was relatively simple.
+			The only real difference was having to make new edges and vertices and 
+			picking where to put them in my implementation and remembering to set the
+			edges that got moved "new" status. It was mostly listing out vertices,
+			edges, faces, and then reassigning again. 
+		</p>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="img/p5_screenshots/mesh_before.png" width="400px"/>
+				  <figcaption>Before Edge Splits</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="img/p5_screenshots/splits_after.png" width="400px"/>
+				  <figcaption>After Edge Splits</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="img/p5_screenshots/mesh_before.png" width="400px"/>
+				  <figcaption>Mesh Before Splits And Flips</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="img/p5_screenshots/flips_and_splits_after_1.png" width="400px"/>
+				  <figcaption>Mesh After Splits And Flips</figcaption>
+				</td>
+			  </tr>
+			</table>
+		</div>
+
 
 		<h3>Part 6: Loop subdivision for mesh upsampling</h3>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<p>
+			In order to implement loop sub division, I tracked each vertex
+			and marked down its new position. Then i marked all the vectors
+			that already existed to be old, so that I could differentiate them
+			later. I also computed the positions for the edge midpoints and split
+			the original edges. After splitting everything, I flipped the edges
+			that connected an old vertex to a new one. I then updated all the vertex
+			positions at the end.
+		</p>
 
-		<h2>(Optional) Section III: Potential Extra Credit - Art Competition: Model something Creative</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="img/p7_results_base/base_cube.png" width="400px"/>
+				  <figcaption>Base Cube</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="img/p7_results_base/base_cube_1.png" width="400px"/>
+				  <figcaption>Base Cube Step 1</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="img/p7_results_base/base_cube_2.png" width="400px"/>
+				  <figcaption>Base Cube Step 2</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="img/p7_results_base/base_cube_3.png" width="400px"/>
+				  <figcaption>Base Cube Step 3</figcaption>
+				</td>
+			  </tr>
+			</table>
 
-		<h2>Additional Notes (please remove)</h2>
-		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
-			</li>
-		</ul>
+			After loop subdivisions the cubes sharp edges do not subdivide 
+			well and become more cone shaped at the edges, resulting in an 
+			asymetric cube. After presplitting this smoothes out and
+			creates a more symetric cube.
+
+		</div>
+
+		<div style="display: flex; flex-direction: column; align-items: center;">
+			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="img/p7_results_preprocess/base_cube.png" width="400px"/>
+				  <figcaption>Base Cube</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="img/p7_results_preprocess/split_cube.png" width="400px"/>
+				  <figcaption>Cube Split</figcaption>
+				</td>
+			  </tr>
+
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="img/p7_results_preprocess/split_cube_p1.png" width="400px"/>
+				  <figcaption>Cube Split 1</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="img/p7_results_preprocess/base_cube_p2.png" width="400px"/>
+				  <figcaption>Cube Split 2</figcaption>
+				</td>
+			  </tr>
+			  <tr>
+				<td style="text-align: center;">
+				  <img src="img/p7_results_preprocess/base_cube_p3.png" width="400px"/>
+				  <figcaption>Cube Split 3</figcaption>
+				</td>
+				<td style="text-align: center;">
+				  <img src="img/p7_results_preprocess/nomnom.png" width="400px"/>
+				  <figcaption>Final Cube</figcaption>
+				</td>
+			  </tr>
+			</table>
+
+			Yes you can preprocess the cube so that it subdivides symetrically.
+			I did this by splitting the cube at all the edges, so that the cube
+			was composed of many more smaller triangles. This resulted in a well
+			subdivided cube, since the subdivision didint have such a sharp jump
+			at the edges like they would have with no splits. The smaller triangles
+			made the subdivision a more gradual process preventing any cones and
+			asymetric cubes. 
+		</div>
+
 		</div>
 	</body>
 </html>
