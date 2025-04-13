@@ -32,10 +32,18 @@
             table {
                 margin-top: 20px; /* Space above the table */
                 margin-bottom: 20px; /* Space below the table */
+                width: 100%;
+                text-align: center;
+                border-collapse: collapse;
             }
 
             td {
                 padding: 10px; /* Add padding within table cells */
+                vertical-align: top; /* Align content to the top */
+            }
+
+            .param-section {
+                margin-bottom: 40px; /* Add space between parameter discussions */
             }
 
 			body {
@@ -69,7 +77,7 @@
 		<h2>Overview</h2>
 		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
 
-		<h2>Part 1: Masses and springs</h2>
+        <h2>Part 1: Masses and springs</h2>
         <p>
             In this part, we implemented the core structure of the cloth simulation: a grid of point masses connected by springs. These springs model the cloth's physical properties. We implemented three types of constraints (springs):
             <ul>
@@ -84,7 +92,6 @@
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
 				<td style="text-align: center;">
-				  <!-- Using img/write_up/p1/img_2/no_shearing.png as requested for "without any shearing" -->
 				  <img src="img/write_up/p1/img_2/no_shearing.png" width="400px" alt="Wireframe without shearing constraints"/>
 				  <figcaption>Wireframe without shearing constraints (Structural + Bending springs active)</figcaption>
 				</td>
@@ -98,20 +105,101 @@
 				  <img src="img/write_up/p1/img_2/all_constraints.png" width="400px" alt="Wireframe with all constraints"/>
 				  <figcaption>Wireframe with all constraints active (Structural + Shearing + Bending springs)</figcaption>
 				</td>
-				<!-- Removed the second td in this row as the first one now spans both columns -->
 			  </tr>
 			</table>
-            <!-- Optional: Include the base image if relevant -->
-            <!--
-            <figure>
-                <img src="img/write_up/p1/img_1/base_image.png" width="400px" alt="Base wireframe"/>
-                <figcaption>Base wireframe (e.g., only structural constraints)</figcaption>
-            </figure>
-            -->
 		</div>
 
 		<h2>Part 2: Simulation via numerical integration</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        <p>
+            In this part, we implemented the numerical integration step (Verlet integration) to simulate the cloth's movement over time based on forces acting on the masses. We experimented with different simulation parameters to observe their effects on the cloth's behavior. The default parameters are generally `ks = 5000 N/m`, `density = 15 g/cm^2`, and `damping = 0.2%`.
+        </p>
+
+        <div class="param-section">
+            <h3>Spring Constant (<code>ks</code>)</h3>
+            <p>
+                The spring constant (<code>ks</code>) represents the stiffness of the cloth material. This can be clearly seen in our experimentation.
+            </p>
+            <p>
+                With a <strong>low <code>ks</code></strong> (e.g., 500 N/m), the cloth becomes a lot more reactive/bouncy and stretchy. It deforms significantly under gravity or forces and oscillates more visibly when settling from its starting position to its rest position. The material behaves less like stiff fabric and more like a very elastic sheet.
+            </p>
+            <p>
+                With a <strong>high <code>ks</code></strong> (e.g., 1,000,000 N/m), the cloth becomes extremely stiff and resistant to stretching. It hardly deforms or moves much beyond the overall falling motion. When settling, it behaves almost like a rigid object falling, with very little internal oscillation or bouncing. The forces required to stretch the springs become very large, quickly counteracting deformation.
+            </p>
+            <table>
+              <tr>
+                <td>
+                  <img src="img/write_up/p2/ks_500.png" alt="Low ks (500)" width="400px"/>
+                  <figcaption>Low <code>ks</code> (500 N/m): Cloth is very stretchy and hangs low.</figcaption>
+                </td>
+                <td>
+                  <img src="img/write_up/p2/ks_1000000.png" alt="High ks (1,000,000)" width="400px"/>
+                  <figcaption>High <code>ks</code> (1,000,000 N/m): Cloth is very stiff, almost rigid.</figcaption>
+                </td>
+              </tr>
+            </table>
+        </div>
+
+        <div class="param-section">
+            <h3>Density</h3>
+            <p>
+                Density affects the mass of each point mass (mass = density * area / num_points). Higher density means a heavier cloth overall.
+            </p>
+            <p>
+                With a <strong>low density</strong> (e.g., 5 g/cm^2), the cloth is lighter. It might be more susceptible to subtle forces (like air resistance, if modeled) and may appear to float or settle more slowly initially. It also stretches less under its own weight compared to a denser cloth with the same stiffness.
+            </p>
+            <p>
+                With a <strong>high density</strong> (e.g., 100 g/cm^2), the cloth is much heavier. It hangs lower due to its increased weight exerting more force on the springs and pinned points. It appears less affected by minor simulation artifacts or forces and settles more decisively under gravity. The increased mass means more inertia, potentially leading to smoother but heavier-looking motion.
+            </p>
+            <table>
+              <tr>
+                <td>
+                  <img src="img/write_up/p2/density_5.png" alt="Low density (5)" width="400px"/>
+                  <figcaption>Low Density (5 g/cm^2): Lighter cloth, less sag.</figcaption>
+                </td>
+                <td>
+                  <img src="img/write_up/p2/density_100.png" alt="High density (100)" width="400px"/>
+                  <figcaption>High Density (100 g/cm^2): Heavier cloth, sags significantly more.</figcaption>
+                </td>
+              </tr>
+            </table>
+        </div>
+
+        <div class="param-section">
+            <h3>Damping</h3>
+            <p>
+                Damping determines how much energy is dissipated from the system over time. It affects how quickly the cloth settles down and stops oscillating. The damping factor applies a force opposing the velocity of each point mass.
+            </p>
+            <p>
+                With <strong>low damping</strong> (e.g., 0% or `damping_0.png`), the cloth loses very little energy. Any motion or oscillation persists for a long time. The cloth appears very "jiggly" or "bouncy" and takes a considerable amount of time to reach its final resting state after being disturbed or dropped. It might look less realistic for typical fabrics.
+            </p>
+            <p>
+                With <strong>high damping</strong> (e.g., 1% or `damping_1.png`, which might represent a higher value like 10% or more depending on the scale), energy is dissipated very quickly. Oscillations die out rapidly, and the cloth settles to its rest position much faster. The motion appears more muted or "overdamped". A small amount of damping is usually desirable for stability and realism, but too much can make the cloth look unnaturally sluggish.
+            </p>
+             <table>
+              <tr>
+                <td>
+                  <img src="img/write_up/p2/damping_0.png" alt="Low damping (0%)" width="400px"/>
+                  <figcaption>Low Damping (e.g., 0%): Oscillations persist, cloth is jiggly.</figcaption>
+                </td>
+                <td>
+                  <img src="img/write_up/p2/damping_1.png" alt="High damping (e.g., > 1%)" width="400px"/>
+                  <figcaption>High Damping (e.g., > 1%): Oscillations die quickly, settles fast.</figcaption>
+                </td>
+              </tr>
+            </table>
+        </div>
+
+        <hr> <!-- Separator before the final screenshot -->
+
+        <h3>Pinned Cloth (scene/pinned4.json)</h3>
+        <p>
+            Below is a screenshot of the shaded cloth from <code>scene/pinned4.json</code> in its final resting state, using the default simulation parameters (`ks = 5000 N/m`, `density = 15 g/cm^2`, `damping = 0.2%`).
+        </p>
+        <figure>
+            <img src="img/write_up/p2/pinned_4.png" alt="Shaded cloth from pinned4.json at rest" style="width: 60%;"/>
+            <figcaption>Final resting state of shaded cloth in <code>scene/pinned4.json</code> with default parameters.</figcaption>
+        </figure>
+
 
 		<h2>Part 3: Handling collisions with other objects</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
@@ -128,7 +216,7 @@
 		<h2>Additional Notes (please remove)</h2>
 		<ul>
 			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations,
+			<li>If you'd Llike to add math equations,
 				<ul>
 					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
 					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
