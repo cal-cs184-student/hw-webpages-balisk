@@ -14,21 +14,40 @@
 
 			figure {
 				text-align: center;
+                margin-bottom: 30px; /* Added margin for figure spacing */
 			}
 
 			img {
 				display: inline-block;
+                max-width: 100%; /* Ensure images don't overflow container */
+                height: auto; /* Maintain aspect ratio */
 			}
+
+			figcaption {
+				margin-top: 8px; /* Space between image and caption */
+                font-size: 0.9em;
+                color: #555;
+			}
+
+            table {
+                margin-top: 20px; /* Space above the table */
+                margin-bottom: 20px; /* Space below the table */
+            }
+
+            td {
+                padding: 10px; /* Add padding within table cells */
+            }
 
 			body {
 				font-family: 'Inter', sans-serif;
+                line-height: 1.6; /* Improve readability */
 			}
 		</style>
 	</head>
 	<body>
 		<div class="container">
 		<h1>CS184/284A Spring 2025 Homework 4 Write-Up</h1>
-		<div style="text-align: center;">Names: </div>
+		<div style="text-align: center;">Names: David Hernandez (TODO: Add partner names if any)</div>
 
 		<br>
 
@@ -40,7 +59,7 @@
 
 		<figure>
 			<img src="clothsim.png" alt="Cloth draped over sphere" style="width:70%"/>
-			<figcaption>You can add images with captions!</figcaption>
+			<figcaption>Example: Cloth draped over sphere.</figcaption>
 		</figure>
 
 		<!--
@@ -51,32 +70,44 @@
 		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
 
 		<h2>Part 1: Masses and springs</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        <p>
+            In this part, we implemented the core structure of the cloth simulation: a grid of point masses connected by springs. These springs model the cloth's physical properties. We implemented three types of constraints (springs):
+            <ul>
+                <li><b>Structural constraints:</b> Connect adjacent masses horizontally and vertically, resisting stretching.</li>
+                <li><b>Shearing constraints:</b> Connect diagonally adjacent masses, resisting shearing forces.</li>
+                <li><b>Bending constraints:</b> Connect masses two steps away horizontally and vertically, resisting bending or folding.</li>
+            </ul>
+            Below are screenshots taken from <code>scene/pinned2.json</code>, viewed to clearly show the wireframe structure representing these point masses and springs under different constraint configurations.
+        </p>
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<table style="width: 100%; text-align: center; border-collapse: collapse;">
 			  <tr>
 				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <!-- Using img/write_up/p1/img_2/no_shearing.png as requested for "without any shearing" -->
+				  <img src="img/write_up/p1/img_2/no_shearing.png" width="400px" alt="Wireframe without shearing constraints"/>
+				  <figcaption>Wireframe without shearing constraints (Structural + Bending springs active)</figcaption>
 				</td>
 				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				  <img src="img/write_up/p1/img_2/only_shearing.png" width="400px" alt="Wireframe with only shearing constraints"/>
+				  <figcaption>Wireframe with only shearing constraints active</figcaption>
 				</td>
 			  </tr>
 			  <tr>
-				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
+				<td style="text-align: center;" colspan="2"> <!-- Spanning this cell across two columns for centering -->
+				  <img src="img/write_up/p1/img_2/all_constraints.png" width="400px" alt="Wireframe with all constraints"/>
+				  <figcaption>Wireframe with all constraints active (Structural + Shearing + Bending springs)</figcaption>
 				</td>
-				<td style="text-align: center;">
-				  <img src="clothsim.png" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
+				<!-- Removed the second td in this row as the first one now spans both columns -->
 			  </tr>
 			</table>
+            <!-- Optional: Include the base image if relevant -->
+            <!--
+            <figure>
+                <img src="img/write_up/p1/img_1/base_image.png" width="400px" alt="Base wireframe"/>
+                <figcaption>Base wireframe (e.g., only structural constraints)</figcaption>
+            </figure>
+            -->
 		</div>
 
 		<h2>Part 2: Simulation via numerical integration</h2>
@@ -93,11 +124,11 @@
 
 		<h2>(Optional) Part 6: Extra Credit - Additional cloth simulation features!</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-		
+
 		<h2>Additional Notes (please remove)</h2>
 		<ul>
 			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations, 
+			<li>If you'd like to add math equations,
 				<ul>
 					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
 					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
