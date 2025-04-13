@@ -64,7 +64,7 @@
 	<body>
 		<div class="container">
 		<h1>CS184/284A Spring 2025 Homework 4 Write-Up</h1>
-		<div style="text-align: center;">Names: David Hernandez (TODO: Add partner names if any)</div>
+		<div style="text-align: center;">Names: David Hernandez</div>
 
 		<br>
 
@@ -84,13 +84,7 @@
 
         <h2>Part 1: Masses and springs</h2>
         <p>
-            In this part, we implemented the core structure of the cloth simulation: a grid of point masses connected by springs. These springs model the cloth's physical properties. We implemented three types of constraints (springs):
-            <ul>
-                <li><b>Structural constraints:</b> Connect adjacent masses horizontally and vertically, resisting stretching.</li>
-                <li><b>Shearing constraints:</b> Connect diagonally adjacent masses, resisting shearing forces.</li>
-                <li><b>Bending constraints:</b> Connect masses two steps away horizontally and vertically, resisting bending or folding.</li>
-            </ul>
-            Below are screenshots taken from <code>scene/pinned2.json</code>, viewed to clearly show the wireframe structure representing these point masses and springs under different constraint configurations.
+            In this part, we implement a grid of point masses connected by springs. This models the cloth properties well. 
         </p>
 
 		<div style="display: flex; flex-direction: column; align-items: center;">
@@ -116,19 +110,19 @@
 
 		<h2>Part 2: Simulation via numerical integration</h2>
         <p>
-            In this part, we implemented the numerical integration step (Verlet integration) to simulate the cloth's movement over time based on forces acting on the masses. We experimented with different simulation parameters to observe their effects on the cloth's behavior. The default parameters are generally `ks = 5000 N/m`, `density = 15 g/cm^2`, and `damping = 0.2%`.
+            In this part, we implemented the simulation of the cloths movements over time based on the forces that act on the point masses. 
         </p>
 
         <div class="param-section">
             <h3>Spring Constant (<code>ks</code>)</h3>
             <p>
-                The spring constant (<code>ks</code>) represents the stiffness of the cloth material. This can be clearly seen in our experimentation.
+                The spring constant (<code>ks</code>) represents the stiffness of the cloth material.
             </p>
             <p>
-                With a <strong>low <code>ks</code></strong> (e.g., 500 N/m), the cloth becomes a lot more reactive/bouncy and stretchy. It deforms significantly under gravity or forces and oscillates more visibly when settling from its starting position to its rest position. The material behaves less like stiff fabric and more like a very elastic sheet.
+                With a <strong>low <code>ks</code></strong> (500 N/m), the cloth becomes a lot more reactive/bouncy and stretchy. It will change its shape alot more and bounce around when it goes from its starting position to its rest position since the material is not as stiff and is prone to change by physical forces. 
             </p>
             <p>
-                With a <strong>high <code>ks</code></strong> (e.g., 1,000,000 N/m), the cloth becomes extremely stiff and resistant to stretching. It hardly deforms or moves much beyond the overall falling motion. When settling, it behaves almost like a rigid object falling, with very little internal oscillation or bouncing. The forces required to stretch the springs become very large, quickly counteracting deformation.
+                With a <strong>high <code>ks</code></strong> (100,000 N/m), the cloth becomes extremely stiff and resistant to stretching. It hardly deforms or moves much beyond the overall falling motion. When it settles, it behaves almost like a rigid object falling, with very little internal movement or bouncing.
             </p>
             <table>
               <tr>
@@ -138,7 +132,7 @@
                 </td>
                 <td>
                   <img src="img/write_up/p2/ks_1000000.png" alt="High ks (1,000,000)" width="400px"/>
-                  <figcaption>High <code>ks</code> (1,000,000 N/m): Cloth is very stiff, almost rigid.</figcaption>
+                  <figcaption>High <code>ks</code> (100,000 N/m): Cloth is very stiff, almost rigid.</figcaption>
                 </td>
               </tr>
             </table>
@@ -147,7 +141,7 @@
         <div class="param-section">
             <h3>Density</h3>
             <p>
-                Density affects the mass of each point mass (mass = density * area / num_points). Higher density means a heavier cloth overall.
+                Density affects the mass of each point. Which means a higher density makes a heavier cloth. 
             </p>
             <p>
                 With a <strong>low density</strong> (e.g., 5 g/cm^2), the cloth is lighter. It might be more susceptible to subtle forces (like air resistance, if modeled) and may appear to float or settle more slowly initially. It also stretches less under its own weight compared to a denser cloth with the same stiffness.
