@@ -40,10 +40,15 @@
             td {
                 padding: 10px; /* Add padding within table cells */
                 vertical-align: top; /* Align content to the top */
+                width: 33.33%; /* Equal width for 3 columns */
             }
 
             .param-section {
                 margin-bottom: 40px; /* Add space between parameter discussions */
+            }
+
+            .implementation-section {
+                margin-bottom: 30px; /* Space after implementation details */
             }
 
 			body {
@@ -89,7 +94,7 @@
         </p>
 
 		<div style="display: flex; flex-direction: column; align-items: center;">
-			<table style="width: 100%; text-align: center; border-collapse: collapse;">
+			<table>
 			  <tr>
 				<td style="text-align: center;">
 				  <img src="img/write_up/p1/img_2/no_shearing.png" width="400px" alt="Wireframe without shearing constraints"/>
@@ -200,12 +205,224 @@
             <figcaption>Final resting state of shaded cloth in <code>scene/pinned4.json</code> with default parameters.</figcaption>
         </figure>
 
-
 		<h2>Part 3: Handling collisions with other objects</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        <p>
+            This part involved implementing collision detection and response between the cloth point masses and primitive shapes, specifically spheres and planes.
+        </p>
+
+        <div class="implementation-section">
+            <h3>Collision Implementation Details</h3>
+            <h4>Collision with spheres:</h4>
+            <p>
+                The sphere collision method (<code>Sphere::collide</code>) takes a point mass and checks if its current position is inside the sphere (i.e., distance from sphere center is less than sphere radius). If an intersection occurs (the point mass is inside), we need to move it back to the surface.
+            </p>
+            <p>
+                To do this, we first find the direction vector from the sphere's center to the point mass's position. We normalize this vector to get the direction of the nearest point on the sphere surface. The tangent point (target position) is then calculated by placing the point mass at a distance equal to the sphere's radius along this direction vector, starting from the sphere's center.
+            </p>
+            <p>
+                Finally, we compute a correction vector pointing from the point mass's position *before* the time step (<code>last_position</code>) to this tangent point. We adjust the point mass's current <code>position</code> by moving it along this correction vector, scaled by a factor of <code>(1 - friction)</code>. This effectively nudges the point mass out of the sphere onto its surface while accounting for some energy loss due to friction.
+            </p>
+
+            <h4>Collision with planes:</h4>
+            <p>
+                The plane collision method (<code>Plane::collide</code>) checks if a point mass has crossed the plane during the last time step. This is done by evaluating the plane equation ( <code>dot(normal, point_position) - offset</code> ) for both the current <code>position</code> and the <code>last_position</code>. If the signs of these two results are different, a crossing has occurred.
+            </p>
+            <p>
+                If a crossing is detected, we compute the intersection point (<code>tangent_point</code>) where the line segment connecting <code>last_position</code> and <code>position</code> intersects the plane. To prevent numerical issues and ensure the point mass stays slightly above the surface, we apply a small offset (e.g., <code>SURFACE_OFFSET</code>) to this <code>tangent_point</code> in the direction opposite to the side the mass entered from (i.e., back towards the side it was on at <code>last_position</code>, which is given by the plane's normal).
+            </p>
+            <p>
+                Similar to the sphere collision, we then compute a correction vector from the <code>last_position</code> to this adjusted <code>tangent_point</code>. The point mass's current <code>position</code> is updated by moving it along this correction vector, scaled by <code>(1 - friction)</code>.
+            </p>
+        </div>
+
+        <hr>
+
+        <h3>Sphere Collision Results (<code>scene/sphere.json</code>)</h3>
+        <p>
+            We simulated the cloth falling onto a sphere with different spring constants (<code>ks</code>) to observe the effect of stiffness on draping behavior.
+        </p>
+        <p>
+            <b>Explanation of effects:</b> The spring constant <code>ks</code> defines how reactive/stretchy the cloth is. This explains why, with a low <code>ks</code>, the cloth was very stretchy and wrapped around the sphere almost completely, conforming closely to its shape. Conversely, with a high <code>ks</code>, the cloth was very stiff and resisted bending and stretching significantly. It draped less smoothly over the sphere, forming harder folds and maintaining more of its original shape rather than conforming to the sphere's curvature. The default <code>ks</code> provides an intermediate behavior.
+        </p>
+
+        <table>
+            <tr>
+                <td>
+                    <img src="img/write_up/p3/ks_500.png" alt="Cloth on sphere, ks = 500" width="300px"/>
+                    <figcaption>Resting state with low stiffness (<code>ks = 500</code>). Cloth is stretchy and conforms closely.</figcaption>
+                </td>
+                <td>
+                    <img src="img/write_up/p3/ks_5000.png" alt="Cloth on sphere, ks = 5000 (default)" width="300px"/>
+                    <figcaption>Resting state with default stiffness (<code>ks = 5000</code>). Moderate draping.</figcaption>
+                </td>
+                 <td>
+                    <img src="img/write_up/p3/ks_50000.png" alt="Cloth on sphere, ks = 50000" width="300px"/>
+                    <figcaption>Resting state with high stiffness (<code>ks = 50000</code>). Cloth is stiff, forms sharp folds.</figcaption>
+                </td>
+            </tr>
+        </table>
+
+        <hr>
+
+        <h3>Plane Collision Results</h3>
+        <p>
+            Below is a screenshot of the shaded cloth after it has settled peacefully onto the infinite plane. (Requires shaders from Part 5 for custom colors).
+        </p>
+        <figure>
+             <img src="img/write_up/p3/plane_intersection.png" alt="Cloth resting on a plane" style="width: 60%;"/>
+             <figcaption>Shaded cloth resting on the plane.</figcaption>
+        </figure>
 
 		<h2>Part 4: Handling self-collisions</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        <p>
+            To prevent the cloth from unrealistically passing through itself, we implemented a self-collision detection and response mechanism. An efficient approach using spatial hashing was employed to avoid checking every pair of point masses, which would be computationally prohibitive (O(n^2)).
+        </p>
+        <div class="implementation-section">
+            <h3>Self-Collision Implementation Details</h3>
+            <p>
+                Our implementation relies on spatial hashing and involves three key functions:
+            </p>
+            <ul>
+                <li>
+                    <b><code>hash_position</code>:</b> This function maps a 3D position (<code>pos</code>) to a unique key representing a spatial bin (a 3D grid cell). First, we calculate the dimensions of the spatial bin based on the cloth's overall size and the number of bins desired. Then, the function determines the integer coordinates (ix, iy, iz) of the bin containing the given position. These integer coordinates are combined into a single floating-point hash key using a prime number multiplication scheme (e.g., `key = p1*ix + p2*iy + p3*iz`) to ensure a reasonably uniform distribution of points across hash values, minimizing hash collisions.
+                </li>
+                <li>
+                    <b><code>build_spatial_map</code>:</b> This function populates a hash map (e.g., <code>map<float, vector<PointMass *>></code>) that stores lists of point masses belonging to each spatial bin. It iterates through every point mass in the cloth. For each point mass, it calls <code>hash_position</code> to get its spatial bin key. It then inserts a pointer to that point mass into the vector associated with that key in the hash map. If the key doesn't exist yet, a new entry with a new vector is created. This map needs to be rebuilt at the beginning of each simulation time step as point masses move between bins.
+                </li>
+                <li>
+                    <b><code>self_collide</code>:</b> This function performs the actual collision detection and response for a given point mass (<code>pm</code>) during a single time step.
+                    <ol>
+                        <li>It first calculates the hash key for <code>pm</code>'s current position using <code>hash_position</code>.</li>
+                        <li>It retrieves the list of potentially colliding point masses from the spatial map using this key. (Optimization: one might also check adjacent bins).</li>
+                        <li>It iterates through all candidate point masses (<code>candidate_pm</code>) in the retrieved list(s).</li>
+                        <li>For each candidate that is not the same as the original point mass (<code>candidate_pm != pm</code>), it calculates the vector difference between their positions (<code>diff = pm.position - candidate_pm.position</code>) and the distance (<code>dist = length(diff)</code>).</li>
+                        <li>If the distance <code>dist</code> is less than a predefined threshold (<code>2 * thickness</code>, where thickness represents the desired minimum separation distance), a collision is detected.</li>
+                        <li>If a collision occurs, a correction vector is calculated. This vector points from the candidate point mass towards the original point mass (<code>diff / dist</code>) and has a magnitude equal to the penetration depth needed to resolve the collision (<code>2 * thickness - dist</code>).</li>
+                        <li>This correction vector is accumulated (added) across all detected collisions for the current point mass <code>pm</code> within this time step. An accumulator count is also maintained.</li>
+                        <li>After checking all candidates, if any collisions were detected, the total accumulated correction vector is averaged by dividing by the number of collisions found.</li>
+                        <li>This average correction vector is then scaled down by the number of simulation steps per frame (<code>simulation_steps</code>) to distribute the correction smoothly over the frame's substeps.</li>
+                        <li>Finally, this scaled, averaged correction vector is added to the point mass's <code>position</code>, pushing it away from the points it was colliding with.</li>
+                    </ol>
+                </li>
+            </ul>
+            <p>
+                Inside the main simulation loop (<code>Cloth::simulate</code>), before processing forces and constraints, we first call <code>build_spatial_map()</code> to update the spatial hashing structure. Then, within the loop over all point masses, we call <code>self_collide(pm, simulation_steps)</code> for each point mass <code>pm</code> to apply the self-collision corrections.
+            </p>
+        </div>
+
+        <hr>
+
+        <h3>Self-Collision Simulation Progression</h3>
+        <p>
+            The following screenshots show the cloth falling and folding onto itself over time using default parameters. Observe how the self-collision handling prevents inter-penetration and allows complex folding patterns to emerge naturally.
+        </p>
+        <table>
+            <tr>
+                <td>
+                    <img src="img/write_up/p4/cloth_initial.png" alt="Initial self-collision" width="300px"/>
+                    <figcaption>Early stage: Initial contact and folding begin.</figcaption>
+                </td>
+                <td>
+                     <img src="img/write_up/p4/cloth_middle.png" alt="Middle stage of self-collision" width="300px"/>
+                     <figcaption>Middle stage: More complex folds develop.</figcaption>
+                </td>
+                <td>
+                    <img src="img/write_up/p4/cloth_restful.png" alt="Restful state after self-collision" width="300px"/>
+                    <figcaption>Near-restful state: Cloth settled into multiple folds.</figcaption>
+                </td>
+            </tr>
+        </table>
+
+        <hr>
+
+        <h3>Parameter Effects on Self-Collision</h3>
+
+        <div class="param-section">
+            <h4>Spring Constant (<code>ks</code>) Analysis:</h4>
+            <p>
+                Increasing the spring constant (<code>ks</code>) in the simulation results in the cloth being stiffer and more resistant to bending and stretching. Consequently, it does not fold in on itself as much when dropped. This results in a cloth with fewer, broader folds at its final resting state. With a lower <code>ks</code>, the cloth is much more flexible and folds in on itself more easily, leading to more numerous and complex wrinkles and malformations.
+            </p>
+            <!-- Low Ks -->
+            <p><strong>Low Spring Constant (<code>ks</code>) Example:</strong></p>
+            <table>
+                <tr>
+                    <td>
+                        <img src="img/write_up/p4/lowK_cloth_initial.png" alt="Low ks initial fall" width="300px"/>
+                        <figcaption>Low <code>ks</code>: Initial fall, flexible.</figcaption>
+                    </td>
+                    <td>
+                        <img src="img/write_up/p4/lowK_cloth_resting.png" alt="Low ks middle folding" width="300px"/>
+                        <figcaption>Low <code>ks</code>: Complex folding develops.</figcaption>
+                    </td>
+                    <td>
+                        <img src="img/write_up/p4/lowK_cloth_final.png" alt="Low ks final state" width="300px"/>
+                        <figcaption>Low <code>ks</code>: Final state, many intricate folds.</figcaption>
+                    </td>
+                </tr>
+            </table>
+             <!-- High Ks -->
+            <p><strong>High Spring Constant (<code>ks</code>) Example:</strong></p>
+            <table>
+                <tr>
+                    <td>
+                        <img src="img/write_up/p4/highK_cloth_initial.png" alt="High ks initial fall" width="300px"/>
+                        <figcaption>High <code>ks</code>: Initial fall, stiff.</figcaption>
+                    </td>
+                    <td>
+                        <img src="img/write_up/p4/highK_cloth_middle.png" alt="High ks middle folding" width="300px"/>
+                        <figcaption>High <code>ks</code>: Resists folding, forms broader bends.</figcaption>
+                    </td>
+                    <td>
+                        <img src="img/write_up/p4/highK_cloth_final.png" alt="High ks final state" width="300px"/>
+                        <figcaption>High <code>ks</code>: Final state, fewer, wider folds.</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="param-section">
+            <h4>Density Analysis:</h4>
+            <p>
+                When you increase the density of the cloth, it behaves as if the material itself is heavier. This means it falls faster due to greater gravitational force per point mass and tends to settle more quickly, with oscillations damping out sooner because of the increased inertia resisting rapid changes in velocity. Conversely, a low density makes the cloth appear 'floatier', falling more slowly and potentially exhibiting more persistent ripples or bounces before coming to rest, simulating a lighter material like silk versus a heavier one like denim.
+            </p>
+             <!-- Low Density -->
+            <p><strong>Low Density Example:</strong></p>
+            <table>
+                <tr>
+                    <td>
+                        <img src="img/write_up/p4/lowDense_cloth_initial.png" alt="Low density initial fall" width="300px"/>
+                        <figcaption>Low Density: Initial fall, appears lighter.</figcaption>
+                    </td>
+                    <td>
+                        <img src="img/write_up/p4/lowDense_cloth_middle.png" alt="Low density middle folding" width="300px"/>
+                        <figcaption>Low Density: Folding occurs more slowly.</figcaption>
+                    </td>
+                    <td>
+                        <img src="img/write_up/p4/lowDense_cloth_final.png" alt="Low density final state" width="300px"/>
+                        <figcaption>Low Density: Final state, might retain more 'airy' folds.</figcaption>
+                    </td>
+                </tr>
+            </table>
+             <!-- High Density -->
+            <p><strong>High Density Example:</strong></p>
+             <table>
+                <tr>
+                    <td>
+                        <img src="img/write_up/p4/highDense_cloth_initial.png" alt="High density initial fall" width="300px"/>
+                        <figcaption>High Density: Initial fall, appears heavier, falls faster.</figcaption>
+                    </td>
+                    <td>
+                         <img src="img/write_up/p4/highDense_cloth_resting.png" alt="High density middle/resting" width="300px"/>
+                         <figcaption>High Density: Settles more quickly.</figcaption>
+                    </td>
+                    <td>
+                         <img src="img/write_up/p4/highDense_cloth_final.png" alt="High density final state" width="300px"/>
+                         <figcaption>High Density: Final state, folds appear more compacted.</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
 
 		<h2>Part 5: Shaders</h2>
 		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
