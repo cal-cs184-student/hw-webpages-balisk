@@ -201,31 +201,23 @@
 
 		<h2>Part 3: Handling collisions with other objects</h2>
         <p>
-            This part involved implementing collision detection and response between the cloth point masses and primitive shapes, specifically spheres and planes.
+            This part involves implementing collision detection.
         </p>
 
         <div class="implementation-section">
             <h3>Collision Implementation Details</h3>
             <h4>Collision with spheres:</h4>
             <p>
-                The sphere collision method (<code>Sphere::collide</code>) takes a point mass and checks if its current position is inside the sphere (i.e., distance from sphere center is less than sphere radius). If an intersection occurs (the point mass is inside), we need to move it back to the surface.
+                The sphere collision method (<code>Sphere::collide</code>) takes a point mass and checks if its current position is inside the sphere. If an intersection happens, we move it back to the surface.
             </p>
             <p>
-                To do this, we first find the direction vector from the sphere's center to the point mass's position. We normalize this vector to get the direction of the nearest point on the sphere surface. The tangent point (target position) is then calculated by placing the point mass at a distance equal to the sphere's radius along this direction vector, starting from the sphere's center.
+				If it is inside the sphere, the point mass is put along the surface of the sphere. To do this we create a correction vector from the last_position of the point mass and the tangent point on the sphere's surface. Then using this vector, I scaled it by a factor of (1-f), and moved the point mass along this vector to put it in the proper place.
             </p>
-            <p>
-                Finally, we compute a correction vector pointing from the point mass's position *before* the time step (<code>last_position</code>) to this tangent point. We adjust the point mass's current <code>position</code> by moving it along this correction vector, scaled by a factor of <code>(1 - friction)</code>. This effectively nudges the point mass out of the sphere onto its surface while accounting for some energy loss due to friction.
-            </p>
+        
 
             <h4>Collision with planes:</h4>
             <p>
-                The plane collision method (<code>Plane::collide</code>) checks if a point mass has crossed the plane during the last time step. This is done by evaluating the plane equation ( <code>dot(normal, point_position) - offset</code> ) for both the current <code>position</code> and the <code>last_position</code>. If the signs of these two results are different, a crossing has occurred.
-            </p>
-            <p>
-                If a crossing is detected, we compute the intersection point (<code>tangent_point</code>) where the line segment connecting <code>last_position</code> and <code>position</code> intersects the plane. To prevent numerical issues and ensure the point mass stays slightly above the surface, we apply a small offset (e.g., <code>SURFACE_OFFSET</code>) to this <code>tangent_point</code> in the direction opposite to the side the mass entered from (i.e., back towards the side it was on at <code>last_position</code>, which is given by the plane's normal).
-            </p>
-            <p>
-                Similar to the sphere collision, we then compute a correction vector from the <code>last_position</code> to this adjusted <code>tangent_point</code>. The point mass's current <code>position</code> is updated by moving it along this correction vector, scaled by <code>(1 - friction)</code>.
+                The plane collision method (<code>Plane::collide</code>) checks if a point mass has crossed the plane during the last time step. If a crossing is detected, I compute the intersection point between the mass's trajectory and the plane. Then I apply a small offset in the direction of the original side of the plane before crossing. Then I apply a correction of the last_position of the object to the adjusted tangent point which is scaled by (1-f) to get the the right side of the plane.
             </p>
         </div>
 
@@ -233,10 +225,10 @@
 
         <h3>Sphere Collision Results (<code>scene/sphere.json</code>)</h3>
         <p>
-            We simulated the cloth falling onto a sphere with different spring constants (<code>ks</code>) to observe the effect of stiffness on draping behavior.
+            We simulated the cloth falling onto a sphere with different spring constants (<code>ks</code>).
         </p>
         <p>
-            <b>Explanation of effects:</b> The spring constant <code>ks</code> defines how reactive/stretchy the cloth is. This explains why, with a low <code>ks</code>, the cloth was very stretchy and wrapped around the sphere almost completely, conforming closely to its shape. Conversely, with a high <code>ks</code>, the cloth was very stiff and resisted bending and stretching significantly. It draped less smoothly over the sphere, forming harder folds and maintaining more of its original shape rather than conforming to the sphere's curvature. The default <code>ks</code> provides an intermediate behavior.
+            <b>Explanation of effects:</b> The spring constant <code>ks</code> defines how reactive the cloth is. This explains why, with a low <code>ks</code>, the cloth was very stretchy and wrapped around the sphere almost completely. On the other hand, with a high <code>ks</code>, the cloth was very stiff and resisted bending. It ended up forming harder folds and maintaining more of its original shape rather than conforming to the sphere's curves.
         </p>
 
         <table>
@@ -260,7 +252,7 @@
 
         <h3>Plane Collision Results</h3>
         <p>
-            Below is a screenshot of the shaded cloth after it has settled peacefully onto the infinite plane. (Requires shaders from Part 5 for custom colors).
+            Below is a picture of a cloth on the plane.
         </p>
         <figure>
              <img src="img/write_up/p3/plane_intersection.png" alt="Cloth resting on a plane" style="width: 60%;"/>
@@ -269,7 +261,7 @@
 
 		<h2>Part 4: Handling self-collisions</h2>
         <p>
-            To prevent the cloth from unrealistically passing through itself, we implemented a self-collision detection and response mechanism. An efficient approach using spatial hashing was employed to avoid checking every pair of point masses, which would be computationally prohibitive (O(n^2)).
+            To prevent the cloth from passing through itself, this part implemented a self-collision function. An approach using spatial hashing was used to avoid checking every pair of point masses.
         </p>
         <div class="implementation-section">
             <h3>Self-Collision Implementation Details</h3>
@@ -278,21 +270,21 @@
             </p>
             <ul>
                 <li>
-                    <b><code>hash_position</code>:</b> This function maps a 3D position (<code>pos</code>) to a unique key representing a spatial bin (a 3D grid cell). First, we calculate the dimensions of the spatial bin based on the cloth's overall size and the number of bins desired. Then, the function determines the integer coordinates (ix, iy, iz) of the bin containing the given position. These integer coordinates are combined into a single floating-point hash key using a prime number multiplication scheme (e.g., `key = p1*ix + p2*iy + p3*iz`) to ensure a reasonably uniform distribution of points across hash values, minimizing hash collisions.
+                    <b><code>hash_position</code>:</b> This function maps a 3D position (<code>pos</code>) to a unique key representing a spatial bin. First, we calculate the dimensions of the spatial bin based on the cloth's overall size and the number of bins. Then, the function determines the integer coordinates (ix, iy, iz) of the bin containing the given position. These integer coordinates are combined into a single floating-point hash key using a prime number multiplication scheme.
                 </li>
                 <li>
-                    <b><code>build_spatial_map</code>:</b> This function populates a hash map (e.g., <code>map<float, vector<PointMass *>></code>) that stores lists of point masses belonging to each spatial bin. It iterates through every point mass in the cloth. For each point mass, it calls <code>hash_position</code> to get its spatial bin key. It then inserts a pointer to that point mass into the vector associated with that key in the hash map. If the key doesn't exist yet, a new entry with a new vector is created. This map needs to be rebuilt at the beginning of each simulation time step as point masses move between bins.
+                    <b><code>build_spatial_map</code>:</b> This function populates a hash map (e.g., <code>map<float, vector<PointMass *>></code>) that stores lists of point masses belonging to each spatial bin. It iterates through every point mass in the cloth. For each point mass, it calls <code>hash_position</code> to get its spatial bin key. It then inserts a pointer to that point mass into the vector associated with that key in the hash map. If the key doesn't exist yet, a new entry with a new vector is created.
                 </li>
                 <li>
                     <b><code>self_collide</code>:</b> This function performs the actual collision detection and response for a given point mass (<code>pm</code>) during a single time step.
                     <ol>
                         <li>It first calculates the hash key for <code>pm</code>'s current position using <code>hash_position</code>.</li>
-                        <li>It retrieves the list of potentially colliding point masses from the spatial map using this key. (Optimization: one might also check adjacent bins).</li>
-                        <li>It iterates through all candidate point masses (<code>candidate_pm</code>) in the retrieved list(s).</li>
-                        <li>For each candidate that is not the same as the original point mass (<code>candidate_pm != pm</code>), it calculates the vector difference between their positions (<code>diff = pm.position - candidate_pm.position</code>) and the distance (<code>dist = length(diff)</code>).</li>
-                        <li>If the distance <code>dist</code> is less than a predefined threshold (<code>2 * thickness</code>, where thickness represents the desired minimum separation distance), a collision is detected.</li>
-                        <li>If a collision occurs, a correction vector is calculated. This vector points from the candidate point mass towards the original point mass (<code>diff / dist</code>) and has a magnitude equal to the penetration depth needed to resolve the collision (<code>2 * thickness - dist</code>).</li>
-                        <li>This correction vector is accumulated (added) across all detected collisions for the current point mass <code>pm</code> within this time step. An accumulator count is also maintained.</li>
+                        <li>It retrieves the list of potentially colliding point masses from the spatial map using this key.</li>
+                        <li>It iterates through all candidate point masses (<code>candidate_pm</code>) in the retrieved list.</li>
+                        <li>For each candidate that is not the same as the original point mass, it calculates the vector difference between their positions and the distance</li>
+                        <li>If the distance <code>dist</code> is less than the threshold, a collision is detected.</li>
+                        <li>If a collision occurs, a correction vector is calculated. This vector points from the candidate point mass towards the original point mass.</li>
+                        <li>This correction vector is accumulated across all detected collisions for the current point mass <code>pm</code> within this time step.</li>
                         <li>After checking all candidates, if any collisions were detected, the total accumulated correction vector is averaged by dividing by the number of collisions found.</li>
                         <li>This average correction vector is then scaled down by the number of simulation steps per frame (<code>simulation_steps</code>) to distribute the correction smoothly over the frame's substeps.</li>
                         <li>Finally, this scaled, averaged correction vector is added to the point mass's <code>position</code>, pushing it away from the points it was colliding with.</li>
@@ -300,7 +292,7 @@
                 </li>
             </ul>
             <p>
-                Inside the main simulation loop (<code>Cloth::simulate</code>), before processing forces and constraints, we first call <code>build_spatial_map()</code> to update the spatial hashing structure. Then, within the loop over all point masses, we call <code>self_collide(pm, simulation_steps)</code> for each point mass <code>pm</code> to apply the self-collision corrections.
+                Inside the main simulation loop, Within the loop over all point masses, we call <code>self_collide</code> for each point mass <code>pm</code> to apply the self-collision corrections.
             </p>
         </div>
 
@@ -308,7 +300,7 @@
 
         <h3>Self-Collision Simulation Progression</h3>
         <p>
-            The following screenshots show the cloth falling and folding onto itself over time using default parameters. Observe how the self-collision handling prevents inter-penetration and allows complex folding patterns to emerge naturally.
+            The following screenshots show the cloth falling and folding onto itself over time using default parameters.
         </p>
         <table>
             <tr>
@@ -334,7 +326,7 @@
         <div class="param-section">
             <h4>Spring Constant (<code>ks</code>) Analysis:</h4>
             <p>
-                Increasing the spring constant (<code>ks</code>) in the simulation results in the cloth being stiffer and more resistant to bending and stretching. Consequently, it does not fold in on itself as much when dropped. This results in a cloth with fewer, broader folds at its final resting state. With a lower <code>ks</code>, the cloth is much more flexible and folds in on itself more easily, leading to more numerous and complex wrinkles and malformations.
+                Increasing the spring constant (<code>ks</code>) in the simulation results in the cloth being stiffer and more resistant to bending and stretching. As a result, it does not fold in on itself as much when dropped. This results in a cloth with fewer folds at its final resting state. With a lower <code>ks</code>, the cloth is much more flexible and folds in on itself more easily, leading to more wrinkles.
             </p>
             <!-- Low Ks -->
             <p><strong>Low Spring Constant (<code>ks</code>) Example:</strong></p>
@@ -346,11 +338,11 @@
                     </td>
                     <td>
                         <img src="img/write_up/p4/lowK_cloth_resting.png" alt="Low ks middle folding" width="300px"/>
-                        <figcaption>Low <code>ks</code>: Complex folding develops.</figcaption>
+                        <figcaption>Low <code>ks</code>: Complex folding.</figcaption>
                     </td>
                     <td>
                         <img src="img/write_up/p4/lowK_cloth_final.png" alt="Low ks final state" width="300px"/>
-                        <figcaption>Low <code>ks</code>: Final state, many intricate folds.</figcaption>
+                        <figcaption>Low <code>ks</code>: Final state, many folds.</figcaption>
                     </td>
                 </tr>
             </table>
@@ -364,7 +356,7 @@
                     </td>
                     <td>
                         <img src="img/write_up/p4/highK_cloth_middle.png" alt="High ks middle folding" width="300px"/>
-                        <figcaption>High <code>ks</code>: Resists folding, forms broader bends.</figcaption>
+                        <figcaption>High <code>ks</code>:forms broader bends.</figcaption>
                     </td>
                     <td>
                         <img src="img/write_up/p4/highK_cloth_final.png" alt="High ks final state" width="300px"/>
@@ -374,185 +366,34 @@
             </table>
         </div>
 
-        <h2>Part 4: Handling self-collisions</h2>
-        <p>
-            To prevent the cloth from unrealistically passing through itself, we implemented a self-collision detection and response mechanism. An efficient approach using spatial hashing was employed to avoid checking every pair of point masses, which would be computationally prohibitive (O(n^2)).
-        </p>
-        <div class="implementation-section">
-            <h3>Self-Collision Implementation Details</h3>
-            <p>
-                Our implementation relies on spatial hashing and involves three key functions:
-            </p>
-            <ul>
-                <li>
-                    <b><code>hash_position</code>:</b> This function maps a 3D position (<code>pos</code>) to a unique key representing a spatial bin (a 3D grid cell). First, we calculate the dimensions of the spatial bin based on the cloth's overall size and the number of bins desired. Then, the function determines the integer coordinates (ix, iy, iz) of the bin containing the given position. These integer coordinates are combined into a single floating-point hash key using a prime number multiplication scheme (e.g., `key = p1*ix + p2*iy + p3*iz`) to ensure a reasonably uniform distribution of points across hash values, minimizing hash collisions.
-                </li>
-                <li>
-                    <b><code>build_spatial_map</code>:</b> This function populates a hash map (e.g., <code>map<float, vector<PointMass *>></code>) that stores lists of point masses belonging to each spatial bin. It iterates through every point mass in the cloth. For each point mass, it calls <code>hash_position</code> to get its spatial bin key. It then inserts a pointer to that point mass into the vector associated with that key in the hash map. If the key doesn't exist yet, a new entry with a new vector is created. This map needs to be rebuilt at the beginning of each simulation time step as point masses move between bins.
-                </li>
-                <li>
-                    <b><code>self_collide</code>:</b> This function performs the actual collision detection and response for a given point mass (<code>pm</code>) during a single time step.
-                    <ol>
-                        <li>It first calculates the hash key for <code>pm</code>'s current position using <code>hash_position</code>.</li>
-                        <li>It retrieves the list of potentially colliding point masses from the spatial map using this key. (Optimization: one might also check adjacent bins).</li>
-                        <li>It iterates through all candidate point masses (<code>candidate_pm</code>) in the retrieved list(s).</li>
-                        <li>For each candidate that is not the same as the original point mass (<code>candidate_pm != pm</code>), it calculates the vector difference between their positions (<code>diff = pm.position - candidate_pm.position</code>) and the distance (<code>dist = length(diff)</code>).</li>
-                        <li>If the distance <code>dist</code> is less than a predefined threshold (<code>2 * thickness</code>, where thickness represents the desired minimum separation distance), a collision is detected.</li>
-                        <li>If a collision occurs, a correction vector is calculated. This vector points from the candidate point mass towards the original point mass (<code>diff / dist</code>) and has a magnitude equal to the penetration depth needed to resolve the collision (<code>2 * thickness - dist</code>).</li>
-                        <li>This correction vector is accumulated (added) across all detected collisions for the current point mass <code>pm</code> within this time step. An accumulator count is also maintained.</li>
-                        <li>After checking all candidates, if any collisions were detected, the total accumulated correction vector is averaged by dividing by the number of collisions found.</li>
-                        <li>This average correction vector is then scaled down by the number of simulation steps per frame (<code>simulation_steps</code>) to distribute the correction smoothly over the frame's substeps.</li>
-                        <li>Finally, this scaled, averaged correction vector is added to the point mass's <code>position</code>, pushing it away from the points it was colliding with.</li>
-                    </ol>
-                </li>
-            </ul>
-            <p>
-                Inside the main simulation loop (<code>Cloth::simulate</code>), before processing forces and constraints, we first call <code>build_spatial_map()</code> to update the spatial hashing structure. Then, within the loop over all point masses, we call <code>self_collide(pm, simulation_steps)</code> for each point mass <code>pm</code> to apply the self-collision corrections.
-            </p>
-        </div>
-
-        <hr>
-
-        <h3>Self-Collision Simulation Progression</h3>
-        <p>
-            The following screenshots show the cloth falling and folding onto itself over time using default parameters. Observe how the self-collision handling prevents inter-penetration and allows complex folding patterns to emerge naturally.
-        </p>
-        <table>
-            <tr>
-                <td style="width: 33.33%;">
-                    <img src="img/write_up/p4/cloth_initial.png" alt="Initial self-collision" />
-                    <figcaption>Early stage: Initial contact and folding begin.</figcaption>
-                </td>
-                <td style="width: 33.33%;">
-                     <img src="img/write_up/p4/cloth_middle.png" alt="Middle stage of self-collision" />
-                     <figcaption>Middle stage: More complex folds develop.</figcaption>
-                </td>
-                <td style="width: 33.33%;">
-                    <img src="img/write_up/p4/cloth_restful.png" alt="Restful state after self-collision" />
-                    <figcaption>Near-restful state: Cloth settled into multiple folds.</figcaption>
-                </td>
-            </tr>
-        </table>
-
-        <hr>
-
-        <h3>Parameter Effects on Self-Collision</h3>
-
-        <div class="param-section">
-            <h4>Spring Constant (<code>ks</code>) Analysis:</h4>
-            <p>
-                Increasing the spring constant (<code>ks</code>) in the simulation results in the cloth being stiffer and more resistant to bending and stretching. Consequently, it does not fold in on itself as much when dropped. This results in a cloth with fewer, broader folds at its final resting state. With a lower <code>ks</code>, the cloth is much more flexible and folds in on itself more easily, leading to more numerous and complex wrinkles and malformations.
-            </p>
-            <!-- Low Ks -->
-            <p><strong>Low Spring Constant (<code>ks</code>) Example:</strong></p>
-            <table>
-                <tr>
-                    <td style="width: 33.33%;">
-                        <img src="img/write_up/p4/lowK_cloth_initial.png" alt="Low ks initial fall" />
-                        <figcaption>Low <code>ks</code>: Initial fall, flexible.</figcaption>
-                    </td>
-                    <td style="width: 33.33%;">
-                        <img src="img/write_up/p4/lowK_cloth_resting.png" alt="Low ks middle folding" />
-                        <figcaption>Low <code>ks</code>: Complex folding develops.</figcaption>
-                    </td>
-                    <td style="width: 33.33%;">
-                        <img src="img/write_up/p4/lowK_cloth_final.png" alt="Low ks final state" />
-                        <figcaption>Low <code>ks</code>: Final state, many intricate folds.</figcaption>
-                    </td>
-                </tr>
-            </table>
-             <!-- High Ks -->
-            <p><strong>High Spring Constant (<code>ks</code>) Example:</strong></p>
-            <table>
-                <tr>
-                    <td style="width: 33.33%;">
-                        <img src="img/write_up/p4/highK_cloth_initial.png" alt="High ks initial fall" />
-                        <figcaption>High <code>ks</code>: Initial fall, stiff.</figcaption>
-                    </td>
-                    <td style="width: 33.33%;">
-                        <img src="img/write_up/p4/highK_cloth_middle.png" alt="High ks middle folding" />
-                        <figcaption>High <code>ks</code>: Resists folding, forms broader bends.</figcaption>
-                    </td>
-                    <td style="width: 33.33%;">
-                        <img src="img/write_up/p4/highK_cloth_final.png" alt="High ks final state" />
-                        <figcaption>High <code>ks</code>: Final state, fewer, wider folds.</figcaption>
-                    </td>
-                </tr>
-            </table>
-        </div>
-
-        <div class="param-section">
-            <h4>Density Analysis:</h4>
-            <p>
-                When you increase the density of the cloth, it behaves as if the material itself is heavier. This means it falls faster due to greater gravitational force per point mass and tends to settle more quickly, with oscillations damping out sooner because of the increased inertia resisting rapid changes in velocity. Conversely, a low density makes the cloth appear 'floatier', falling more slowly and potentially exhibiting more persistent ripples or bounces before coming to rest, simulating a lighter material like silk versus a heavier one like denim.
-            </p>
-             <!-- Low Density -->
-            <p><strong>Low Density Example:</strong></p>
-            <table>
-                <tr>
-                    <td style="width: 33.33%;">
-                        <img src="img/write_up/p4/lowDense_cloth_initial.png" alt="Low density initial fall" />
-                        <figcaption>Low Density: Initial fall, appears lighter.</figcaption>
-                    </td>
-                    <td style="width: 33.33%;">
-                        <img src="img/write_up/p4/lowDense_cloth_middle.png" alt="Low density middle folding" />
-                        <figcaption>Low Density: Folding occurs more slowly.</figcaption>
-                    </td>
-                    <td style="width: 33.33%;">
-                        <img src="img/write_up/p4/lowDense_cloth_final.png" alt="Low density final state" />
-                        <figcaption>Low Density: Final state, might retain more 'airy' folds.</figcaption>
-                    </td>
-                </tr>
-            </table>
-             <!-- High Density -->
-            <p><strong>High Density Example:</strong></p>
-             <table>
-                <tr>
-                    <td style="width: 33.33%;">
-                        <img src="img/write_up/p4/highDense_cloth_initial.png" alt="High density initial fall" />
-                        <figcaption>High Density: Initial fall, appears heavier, falls faster.</figcaption>
-                    </td>
-                    <td style="width: 33.33%;">
-                         <img src="img/write_up/p4/highDense_cloth_resting.png" alt="High density middle/resting" />
-                         <figcaption>High Density: Settles more quickly.</figcaption>
-                    </td>
-                    <td style="width: 33.33%;">
-                         <img src="img/write_up/p4/highDense_cloth_final.png" alt="High density final state" />
-                         <figcaption>High Density: Final state, folds appear more compacted.</figcaption>
-                    </td>
-                </tr>
-            </table>
-        </div>
-
-
 		<h2>Part 5: Shaders</h2>
         <p>
-            This part involved implementing various shading techniques using GLSL shader programs to enhance the visual appearance of the cloth and other objects in the scene.
+            This part involved implementing various shading techniques using GLSL shader programs.
         </p>
 
         <div class="shader-subsection">
             <h3>Shader Programs Explained</h3>
             <p>
-                A shader program is a piece of code that runs on the Graphics Processing Unit (GPU) and dictates how objects are rendered on the screen. It's part of the programmable graphics pipeline. The two main types of shaders we use work together:
+                A shader program is a piece of code that runs on the GPU and decides how objects are rendered on the screen.
             </p>
             <ul>
-                <li><strong>Vertex Shader:</strong> This shader runs once for each vertex of the 3D model. Its primary jobs are to transform the vertex's position from model space to screen space (using model, view, and projection matrices) and to process per-vertex attributes like normals, colors, and texture coordinates. It then passes these (often interpolated) attributes down the pipeline.</li>
-                <li><strong>Fragment Shader (or Pixel Shader):</strong> After the vertices are processed and primitives (like triangles) are rasterized into fragments (potential pixels), this shader runs once for each fragment. Its main job is to determine the final color of the fragment. It uses the interpolated data received from the vertex shader (like interpolated normals, texture coordinates, world position) along with uniform variables (like light positions, material properties, textures) to calculate the color, often by implementing a lighting model.</li>
+                <li><strong>Vertex Shader:</strong> This shader runs once for each vertex of the 3D model. Its meant to transform the vertex's position from model space to screen space and to process vertex attributes like normals, colors, and texture coordinates. It then passes these attributes down the pipeline. It also writes varyings for use in the fragment shader.</li>
+                <li><strong>Fragment Shader:</strong> After rasterization,primitives are rasterized into fragments, this shader runs once for each fragment. Its main job is to determine the final color of the fragment. </li>
             </ul>
             <p>
-                Together, they allow for sophisticated control over the appearance of objects, enabling effects like realistic lighting, texturing, shadows, reflections, and more, all executed efficiently on the parallel architecture of the GPU.
+                Together you can use both the vertex shader and the fragment shader to decide how something looks. WIth the output of the vertex shader becoming the thing that feeds into the fragment shader.
             </p>
         </div>
 
         <div class="shader-subsection">
             <h3>Blinn-Phong Shading Model</h3>
             <p>
-                The Blinn-Phong shading model is an empirical model used to approximate the appearance of local illumination on a surface. It calculates the color of a point by summing three components:
+                The Blinn-Phong shading model is a model used to approximate the appearance of local light illumination on a surface. It calculates the color of a point by summing three components:
             </p>
             <ul>
-                <li><strong>Ambient Component:</strong> This represents indirect light that's scattered uniformly throughout the scene. It provides a base color to objects, ensuring that even parts not directly lit aren't completely black. It's typically a constant color multiplied by the material's ambient reflectivity: \( L_{ambient} = k_a \cdot I_a \), where \(k_a\) is the ambient coefficient and \(I_a\) is the ambient light intensity.</li>
-                <li><strong>Diffuse Component:</strong> This simulates light reflecting equally in all directions from a matte surface. Its intensity depends on the angle between the surface normal (\(N\)) and the direction to the light source (\(L\)). According to Lambert's Law, the intensity is proportional to the cosine of this angle. It's calculated as \( L_{diffuse} = k_d \cdot I_L \cdot \max(0, N \cdot L) \), where \(k_d\) is the diffuse coefficient and \(I_L\) is the light intensity.</li>
-                <li><strong>Specular Component:</strong> This simulates shiny highlights, where light reflects more strongly in a specific direction towards the viewer. The Blinn-Phong model uses a halfway vector (\(H\)) between the light direction (\(L\)) and the view direction (\(V\)). The intensity depends on the angle between the surface normal (\(N\)) and this halfway vector, raised to a power (\(p\), the shininess exponent) which controls the size and sharpness of the highlight. It's calculated as \( L_{specular} = k_s \cdot I_L \cdot \max(0, N \cdot H)^p \), where \(k_s\) is the specular coefficient and \(H = \normalize(L+V)\).</li>
+                <li><strong>Ambient Component:</strong> This represents indirect light that's scattered throughout the scene.</li>
+                <li><strong>Diffuse Component:</strong> This simulates light reflecting equally in all directions from a matte surface.</li>
+                <li><strong>Specular Component:</strong> This simulates shiny highlights, where light reflects more strongly in a specific direction towards the viewer.</li>
             </ul>
             <p>The final color is the sum of these three components: \( L = L_{ambient} + L_{diffuse} + L_{specular} \).</p>
             <p>Below are screenshots showing each component individually and then combined for a white sphere:</p>
@@ -578,63 +419,50 @@
                 </td>
               </tr>
             </table>
-            <p>Here is the full Blinn-Phong model applied to the cloth with default material properties:</p>
-             <figure>
-                 <img src="img/write_up/p5/all_terms.png" alt="Full Blinn-Phong on cloth" style="width: 60%;"/>
-                 <figcaption>Full Blinn-Phong shading on the cloth.</figcaption>
-             </figure>
         </div>
 
         <div class="shader-subsection">
             <h3>Texture Mapping</h3>
             <p>
-                Texture mapping allows us to apply a 2D image (texture) onto the surface of a 3D model, adding significant visual detail. The vertex shader passes texture coordinates (UV coordinates) associated with each vertex to the fragment shader. The fragment shader interpolates these coordinates across the surface of the primitive. It then uses the interpolated UV coordinate to look up a color value (texel) from the supplied texture image using a sampler function (e.g., `texture2D`). This fetched texture color can then be used in the lighting calculation, typically as the diffuse color (\(k_d\)) or by modulating the base diffuse color.
+                Texture mapping allows us to apply a 2D image onto the surface of a 3D model.
             </p>
             <p>Here is the cloth rendered with a custom texture (`textures/texture1.png`):</p>
             <figure>
-                 <img src="img/write_up/p5/texture_1.png" alt="Cloth with custom texture mapping" style="width: 60%;"/>
-                 <figcaption>Cloth rendered using texture mapping with <code>textures/texture1.png</code>.</figcaption>
+                 <img src="img/write_up/p5/cloth_on_ball.png" alt="Cloth with custom texture mapping" style="width: 60%;"/>
+                 <figcaption>Cloth rendered on ball using texture mapping.</figcaption>
             </figure>
-            <!-- <figure>
-                 <img src="img/write_up/p5/repo_texture.png" alt="Custom texture file used" style="width: 30%;"/>
-                 <figcaption>The custom texture file (<code>textures/texture1.png</code>) used.</figcaption>
-            </figure> -->
+			<figure>
+				<img src="img/write_up/p5/repo_texture_cloth.png" alt="Cloth with custom texture mapping on ball" style="width: 60%;"/>
+				<figcaption>Cloth rendered using texture mapping.</figcaption>
+		   </figure>
         </div>
 
         <div class="shader-subsection">
             <h3>Bump and Displacement Mapping Comparison</h3>
             <p>
-                Both bump mapping and displacement mapping use a texture (often called a height map) to create the appearance of surface detail, but they work differently. We used <code>textures/texture1.png</code> for both techniques below.
+                Both bump mapping and displacement mapping use a texture (often called a height map) to create the appearance of surface detail. The picnic texture for both techniques below.
             </p>
             <ul>
-                <li><strong>Bump Mapping:</strong> This technique simulates surface detail without actually changing the geometry. In the fragment shader, it uses the height map to perturb the surface normal vector used for lighting calculations. Areas corresponding to brighter parts of the height map are treated as if they face slightly differently than the underlying smooth geometry, creating the illusion of bumps and dents through shading variations. However, the silhouette of the object remains unchanged.</li>
-                <li><strong>Displacement Mapping:</strong> This technique actually modifies the positions of the vertices based on the height map. In the vertex shader (or more commonly, a tessellation shader), vertices are moved outwards or inwards along their normal direction according to the height value sampled from the texture. This creates real geometric detail, affecting the object's silhouette and producing more realistic results, especially at grazing angles. However, it requires a sufficiently dense mesh (or tessellation) to represent the displaced details effectively.</li>
+                <li><strong>Bump Mapping:</strong> This technique simulates surface detail without actually changing the geometry.</li>
+                <li><strong>Displacement Mapping:</strong> This technique actually modifies the positions of the vertices based on the height map.</li>
             </ul>
 
-            <h4>Comparison:</h4>
-            <p>
-                Bump mapping is computationally cheaper and works well on low-polygon models as it only affects shading calculations per pixel. Its main drawback is that the effect breaks down at silhouettes and grazing angles where the lack of actual geometry change becomes apparent. Displacement mapping produces more geometrically accurate and visually convincing results, including self-shadowing and correct silhouettes, but it is computationally more expensive and requires high-resolution geometry or dynamic tessellation.
-            </p>
+
 
              <h4>Effect of Mesh Resolution:</h4>
              <p>
                  We observe the difference by rendering the sphere with low resolution (<code>-o 16 -a 16</code>) and high resolution (<code>-o 128 -a 128</code>).
              </p>
-             <ul>
-                 <li><strong>Bump Mapping:</strong> The perceived detail from bump mapping is largely independent of the underlying mesh resolution, as it's a per-fragment shading effect. The shading details appear similar on both the low-res and high-res spheres.</li>
-                 <li><strong>Displacement Mapping:</strong> The quality of displacement mapping heavily depends on mesh resolution. On the low-resolution sphere (16x16), there aren't enough vertices to accurately represent the details from the height map, resulting in a blocky or poorly defined displacement. On the high-resolution sphere (128x128), there are many more vertices, allowing the displacement map to create much finer and more accurate geometric detail.</li>
-             </ul>
-
             <p><strong>Bump Mapping Results:</strong></p>
             <table>
                 <tr>
                     <td>
                         <img src="img/write_up/p5/bump_cloth_16.png" alt="Bump mapping on cloth" width="400px"/>
-                        <figcaption>Bump Mapping applied to the cloth (using <code>texture1.png</code> height).</figcaption>
+                        <figcaption>Bump Mapping applied to the cloth (16x16).</figcaption>
                     </td>
                     <td>
                         <img src="img/write_up/p5/bump_sphere_128.png" alt="Bump mapping on high-res sphere" width="400px"/>
-                        <figcaption>Bump Mapping applied to high-res sphere (128x128) (using <code>texture1.png</code> height).</figcaption>
+                        <figcaption>Bump Mapping applied to high-res sphere (128x128).</figcaption>
                     </td>
                 </tr>
             </table>
@@ -674,7 +502,7 @@
         <div class="shader-subsection">
             <h3>Mirror Shader</h3>
             <p>
-                The mirror shader simulates a perfectly reflective surface. It uses environment mapping, typically with a cube map texture which stores images of the surrounding environment in six directions (+X, -X, +Y, -Y, +Z, -Z). In the fragment shader, we calculate the reflection vector (\(R\)) for the incoming view direction (\(V\)) relative to the surface normal (\(N\)), using the formula \( R = \text{reflect}(V, N) = V - 2 \cdot \text{dot}(V, N) \cdot N \). This reflection vector \(R\) is then used as a 3D texture coordinate to sample the cube map. The color returned from the cube map lookup represents the light arriving from the reflected direction, creating the mirror effect.
+                The mirror shader simulates a perfectly reflective mirror.
             </p>
             <table>
                  <tr>
@@ -689,30 +517,6 @@
                 </tr>
             </table>
         </div>
-
-         <div class="shader-subsection">
-            <h3>Custom Shader</h3>
-            <p>
-                (No custom shader was implemented for this assignment.)
-                <!-- Or, if you made one: Explain what your custom shader does here. -->
-            </p>
-            <!-- Add screenshots if you made a custom shader -->
-        </div>
-
-
-		<h2>(Optional) Part 6: Extra Credit - Additional cloth simulation features!</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-		<h2>Additional Notes (please remove)</h2>
-		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd Llike to add math equations,
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
-			</li>
-		</ul>
 		</div>
 	</body>
 </html>
